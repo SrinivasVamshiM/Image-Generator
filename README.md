@@ -51,15 +51,20 @@ State-of-the-Art Results: LLaVA achieves state-of-the-art performance across 11 
 
 **Integration and Deployment:**
 
+
+
 **First view:**
 
 
 <img width="817" alt="image" src="https://github.com/SrinivasVamshiM/Image-Generator/assets/98442269/f6297a50-cfe8-4a9b-9ed7-1d5e2388d628">
 
+
+
 **Application Working:**
 
 
-<img width="779" alt="image" src="https://github.com/SrinivasVamshiM/Image-Generator/assets/98442269/a3a6c8fe-1a91-4a80-8b05-a59c3bca70d9"><img width="779" alt="image" src="https://github.com/SrinivasVamshiM/Image-Generator/assets/98442269/ac3a888a-6732-4904-8162-4feac683c1c8">
+<img width="781" alt="image" src="https://github.com/SrinivasVamshiM/Image-Generator/assets/98442269/087072fb-12d2-4e46-8ae6-48f3d85996c4"><img width="775" alt="image" src="https://github.com/SrinivasVamshiM/Image-Generator/assets/98442269/cebfeca8-da06-4763-ba19-52d803d8067f">
+
 
 
 
