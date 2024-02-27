@@ -1,0 +1,247 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Generation and Analysis</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            width: 60%;
+            margin: auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .status {
+            text-align: center;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        textarea {
+            width: 60%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 50px;
+            resize: true;
+            min-height: 20px; /* Set minimum height */
+            transition: height 0.3s ease; /* Smooth transition for height changes */
+            text-align:center;
+        }
+
+        textarea:focus {
+            border-color: #4CAF50; /* Change border color on focus */
+        }
+
+        input[type="button"] {
+            padding: 10px 20px;
+            background-color: #24A0ED;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        input[type="button"]:hover {
+            background-color: #45a049;
+        }
+
+        .slider {
+            margin-top: 20px;
+            margin-bottom: 20px; /* Add margin to the bottom */
+            text-align: center;
+        }
+
+        .slider img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #queryanswer {
+            font-weight: bold;
+			text-align: center;
+            color: #14101f;
+        }
+
+        .status-light {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-left: auto; /* Align to the right */
+            background-color: gray; /* Default color */
+            display: inline-block;
+        }
+
+        .connected {
+            background-color: green;
+        }
+
+        .disconnected {
+            background-color: red;
+        }
+
+        .status-section {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+        }
+
+        .query-answer {
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        .input-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .input-container label {
+            margin-bottom: 5px;
+        }
+        
+    </style>
+        
+    </style>
+    <script>
+        let socket;
+
+        function startws() {
+            socket = new WebSocket('ws://127.0.0.1:7890');
+            //socket.binaryType = 'arraybuffer';
+            socket.onopen = function () {
+            document.getElementById("wsstatus").innerText = "Connected";
+            document.getElementById("status-light").classList.remove("disconnected");
+            document.getElementById("status-light").classList.add("connected");
+            }
+            socket.onclose = function () {
+            document.getElementById("wsstatus").innerText = "Closed. Refresh and Try!!!";
+            document.getElementById("status-light").classList.remove("connected");
+            document.getElementById("status-light").classList.add("disconnected");
+            }
+            socket.onerror = function () {
+            document.getElementById("wsstatus").innerText = "Closed! Refresh and Try!!!";
+            document.getElementById("status-light").classList.remove("connected");
+            document.getElementById("status-light").classList.add("disconnected");
+            }
+            socket.onmessage = handleRecv;
+        };
+
+        function sendimgdesc() {
+            let desc = document.getElementById("textforimage").value;
+            if (desc == '') {
+                window.alert('Invalid Description');
+                return;
+            }
+            const message = {type: "desc", content: desc};
+            socket.send(JSON.stringify(message));
+        }
+
+        function sendquery(query) {
+            let desc = document.getElementById("queryonimage").value;
+            let image = document.getElementById("hiddenimageurl").innerText;
+            if (desc == '') {
+                window.alert('Invalid Query');
+                return;
+            }
+            if (image == '') {
+                window.alert('Please generate valid image');
+                return;
+            }
+            const message = {type: "query", content: desc, imageurl : image};
+            socket.send(JSON.stringify(message));
+        }
+
+        function handleRecv(response) {
+            console.log("Received response ", response.data)
+            const event = JSON.parse(response.data);
+            switch (event.type) {
+            case "image":
+                document.getElementById('result').src = event.image;
+                document.getElementById('hiddenimageurl').innerText = event.image;
+                break;
+            case "answer":
+                document.getElementById("queryanswer").innerText = event.answer;
+                // Call playAudio function with the audio URL
+                playAudio(event.audio_url); 
+                break;
+            default:
+                console.log("Invalid response type")
+            }
+        }
+
+
+        function playAudio(audioURL) {
+        var audio = new Audio(audioURL);
+        audio.play();
+        }
+    </script>
+</head>
+
+<body onload="startws()">
+<div class="container">
+    <h1>Image Generation and Analysis</h1>
+    <span id="hiddenimageurl" hidden="true"></span>
+    <div class="content rel">
+        Status: <span id="wsstatus"></span>
+        <div id="status-light" class="status-light"></div>
+    </div>
+    <div class="content rel"></div>
+    <div class="content rel">
+    <div class="input-container">
+        <label for="textforimage">Text Description for Image</label>
+        <textarea id="textforimage" name="textforimage" rows="1" cols="25"></textarea>
+        </div>
+    </div>
+    <div class="button-container">
+        <input type="button" value="Generate Image" onclick="sendimgdesc()"/>
+    </div>
+    <div class="slider rel">
+        <img id="result" src="http://localhost:8080/waiting.png" width=auto height=auto
+             style="border:1px solid #d3d3d3;"/>
+    </div>
+    <div class="content rel">
+        <div class="input-container">
+            <label for="queryonimage">Query on Image</label>
+            <textarea id="queryonimage" name="queryonimage" rows="1" cols="25"></textarea>
+        </div>
+    </div>
+    <div class="button-container">
+        <input type="button" value="AskQuery" onclick="sendquery()"/>
+    </div>
+    <div class="query-answer">
+        <label for="textforimage"></label> <span id="queryanswer"></span>
+    </div>
+</div>
+</body>
+</html>
